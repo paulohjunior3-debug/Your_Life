@@ -3,34 +3,13 @@
 import { useRef, useState, useTransition } from "react";
 import { Camera, User } from "lucide-react";
 import { atualizarAvatar } from "./avatar-actions";
+import { AvatarCropModal } from "./avatar-crop-modal";
 
-function redimensionarImagem(file: File, maxLado = 400, qualidade = 0.85) {
-  return new Promise<Blob>((resolve, reject) => {
+function lerComoDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
     const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result as string);
     leitor.onerror = () => reject(new Error("Não foi possível ler o arquivo"));
-    leitor.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error("Arquivo não é uma imagem válida"));
-      img.onload = () => {
-        const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width * escala;
-        canvas.height = img.height * escala;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Canvas não suportado nesse navegador"));
-          return;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(
-          (blob) =>
-            blob ? resolve(blob) : reject(new Error("Falha ao processar imagem")),
-          "image/jpeg",
-          qualidade
-        );
-      };
-      img.src = leitor.result as string;
-    };
     leitor.readAsDataURL(file);
   });
 }
@@ -43,6 +22,9 @@ export function AvatarUpload({
   nome: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [imagemParaRecortar, setImagemParaRecortar] = useState<string | null>(
+    null
+  );
   const [preview, setPreview] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -55,22 +37,27 @@ export function AvatarUpload({
     setErro(null);
 
     try {
-      const blob = await redimensionarImagem(file);
-      setPreview(URL.createObjectURL(blob));
-
-      const formData = new FormData();
-      formData.set("avatar", blob, "avatar.jpg");
-
-      startTransition(async () => {
-        const resultado = await atualizarAvatar(formData);
-        if (resultado?.error) {
-          setErro(resultado.error);
-          setPreview(null);
-        }
-      });
+      const dataUrl = await lerComoDataUrl(file);
+      setImagemParaRecortar(dataUrl);
     } catch (err) {
-      setErro(err instanceof Error ? err.message : "Erro ao processar imagem");
+      setErro(err instanceof Error ? err.message : "Erro ao ler imagem");
     }
+  }
+
+  function onConfirmarRecorte(blob: Blob) {
+    setImagemParaRecortar(null);
+    setPreview(URL.createObjectURL(blob));
+
+    const formData = new FormData();
+    formData.set("avatar", blob, "avatar.jpg");
+
+    startTransition(async () => {
+      const resultado = await atualizarAvatar(formData);
+      if (resultado?.error) {
+        setErro(resultado.error);
+        setPreview(null);
+      }
+    });
   }
 
   const src = preview ?? avatarUrl;
@@ -107,6 +94,14 @@ export function AvatarUpload({
       />
 
       {erro && <p className="text-xs text-status-missed">{erro}</p>}
+
+      {imagemParaRecortar && (
+        <AvatarCropModal
+          imagemSrc={imagemParaRecortar}
+          onCancelar={() => setImagemParaRecortar(null)}
+          onConfirmar={onConfirmarRecorte}
+        />
+      )}
     </div>
   );
 }
