@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Dumbbell, Pencil, Play, Plus } from "lucide-react";
+import { Dumbbell, Pencil, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { DiaSemana } from "@/lib/supabase/types";
 import { nomeDia, ordemDia } from "@/lib/utils/dias-semana";
 import { getDataHojeBrasil, getDiaSemanaHojeBrasil } from "@/lib/utils/data-brasil";
 import { iniciarTreino } from "./actions";
+import { BotaoIniciarTreino } from "./botao-iniciar-treino";
 
 type TemplateComExercicios = {
   id: string;
@@ -71,30 +72,26 @@ export default async function TreinoPage() {
       </div>
 
       {templateHoje && (
-        <form
-          action={iniciarTreino}
-          className="flex flex-col gap-2 rounded-2xl border border-accent/40 bg-card p-4"
-        >
-          <input type="hidden" name="template_id" value={templateHoje.id} />
-          <input type="hidden" name="data" value={dataHoje} />
+        <div className="flex flex-col gap-2 rounded-2xl border border-accent/40 bg-card p-4">
           <p className="text-xs text-foreground-secondary">
             Hoje é {nomeDia(diaHoje)}
           </p>
           <p className="text-lg font-semibold text-foreground">
             {templateHoje.nome}
           </p>
-          <button
-            type="submit"
-            className="mt-1 flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover"
-          >
-            <Play size={16} />
-            {sessaoHoje
-              ? sessaoHoje.status === "completo"
-                ? "Ver treino de hoje"
-                : "Continuar treino de hoje"
-              : "Iniciar treino de hoje"}
-          </button>
-        </form>
+          <BotaoIniciarTreino
+            action={iniciarTreino}
+            templateId={templateHoje.id}
+            data={dataHoje}
+            label={
+              sessaoHoje
+                ? sessaoHoje.status === "completo"
+                  ? "Ver treino de hoje"
+                  : "Continuar treino de hoje"
+                : "Iniciar treino de hoje"
+            }
+          />
+        </div>
       )}
 
       {!temFicha ? (
