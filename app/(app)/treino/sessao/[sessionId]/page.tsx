@@ -166,6 +166,11 @@ export default async function SessaoPage({
                   )}
                 </div>
                 <div>
+                  {exercicio?.grupo_muscular && (
+                    <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                      {exercicio.grupo_muscular}
+                    </p>
+                  )}
                   <p className="text-foreground">{exercicio?.nome}</p>
                   {repRange && (
                     <p className="text-xs text-foreground-secondary">

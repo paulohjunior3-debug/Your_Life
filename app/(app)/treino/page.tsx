@@ -103,43 +103,66 @@ export default async function TreinoPage() {
           escolher os dias e os exercícios que seu personal passou.
         </div>
       ) : (
-        templates.map((template) => (
-          <div key={template.id} className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-foreground-secondary">
-              {template.dia_semana ? nomeDia(template.dia_semana) : template.nome}
-            </h2>
-            <div className="flex flex-col gap-2">
-              {[...template.template_exercises]
-                .sort((a, b) => a.ordem - b.ordem)
-                .map((te) => (
-                  <div
-                    key={te.id}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface text-foreground-secondary">
-                      {te.exercises?.gif_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={te.exercises.gif_url}
-                          alt={te.exercises.nome}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <Dumbbell size={20} />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-foreground">{te.exercises?.nome}</p>
-                      <p className="text-xs text-foreground-secondary">
-                        {te.series}x{te.rep_min}
-                        {te.rep_min !== te.rep_max ? `-${te.rep_max}` : ""}
-                      </p>
-                    </div>
+        templates.map((template) => {
+          const ordenados = [...template.template_exercises].sort(
+            (a, b) => a.ordem - b.ordem
+          );
+
+          const grupos = new Map<string, typeof ordenados>();
+          for (const te of ordenados) {
+            const grupo = te.exercises?.grupo_muscular ?? "Outros";
+            if (!grupos.has(grupo)) grupos.set(grupo, []);
+            grupos.get(grupo)!.push(te);
+          }
+
+          return (
+            <div key={template.id} className="flex flex-col gap-3">
+              <h2 className="text-sm font-medium text-foreground-secondary">
+                {template.dia_semana
+                  ? nomeDia(template.dia_semana)
+                  : template.nome}
+              </h2>
+
+              {Array.from(grupos.entries()).map(([grupo, lista]) => (
+                <div key={grupo} className="flex flex-col gap-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                    {grupo}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {lista.map((te) => (
+                      <div
+                        key={te.id}
+                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+                      >
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface text-foreground-secondary">
+                          {te.exercises?.gif_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={te.exercises.gif_url}
+                              alt={te.exercises.nome}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <Dumbbell size={20} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-foreground">
+                            {te.exercises?.nome}
+                          </p>
+                          <p className="text-xs text-foreground-secondary">
+                            {te.series}x{te.rep_min}
+                            {te.rep_min !== te.rep_max ? `-${te.rep_max}` : ""}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );
