@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check } from "lucide-react";
+import { Check, CloudOff } from "lucide-react";
 import { atualizarSerie } from "./actions";
+import { enfileirar, removerDaFila } from "@/lib/utils/offline-queue";
 
 export function SerieRow({
   sessionSetId,
@@ -22,22 +23,52 @@ export function SerieRow({
   const [carga, setCarga] = useState(cargaInicial?.toString() ?? "");
   const [reps, setReps] = useState(repsInicial?.toString() ?? "");
   const [concluida, setConcluida] = useState(concluidaInicial);
+  const [pendente, setPendente] = useState(false);
   const [, startTransition] = useTransition();
 
+  async function salvar(estado: {
+    carga_kg: number | null;
+    reps: number | null;
+    concluida: boolean;
+  }) {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enfileirar({ id: sessionSetId, ...estado });
+      setPendente(true);
+      return;
+    }
+    try {
+      await atualizarSerie(sessionSetId, estado);
+      removerDaFila(sessionSetId);
+      setPendente(false);
+    } catch {
+      // sem internet ou servidor fora do ar — guarda localmente e sincroniza
+      // depois (ver components de sincronização em (app)/sync-offline.tsx)
+      enfileirar({ id: sessionSetId, ...estado });
+      setPendente(true);
+    }
+  }
+
   function salvarCampos(novaCarga: string, novosReps: string) {
-    startTransition(() => {
-      atualizarSerie(sessionSetId, {
-        carga_kg: novaCarga === "" ? null : Number(novaCarga),
-        reps: novosReps === "" ? null : Number(novosReps),
-      });
+    const estado = {
+      carga_kg: novaCarga === "" ? null : Number(novaCarga),
+      reps: novosReps === "" ? null : Number(novosReps),
+      concluida,
+    };
+    startTransition(async () => {
+      await salvar(estado);
     });
   }
 
   function alternarConcluida() {
     const novo = !concluida;
     setConcluida(novo);
-    startTransition(() => {
-      atualizarSerie(sessionSetId, { concluida: novo });
+    const estado = {
+      carga_kg: carga === "" ? null : Number(carga),
+      reps: reps === "" ? null : Number(reps),
+      concluida: novo,
+    };
+    startTransition(async () => {
+      await salvar(estado);
     });
   }
 
@@ -71,6 +102,14 @@ export function SerieRow({
         onBlur={() => salvarCampos(carga, reps)}
         className="w-14 rounded-md border border-border bg-card px-2 py-1 text-center text-foreground outline-none focus:border-accent"
       />
+
+      {pendente && (
+        <CloudOff
+          size={14}
+          className="shrink-0 text-status-partial"
+          aria-label="Sem internet — vai sincronizar quando a conexão voltar"
+        />
+      )}
 
       <button
         type="button"
