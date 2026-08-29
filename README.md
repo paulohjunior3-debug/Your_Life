@@ -42,11 +42,7 @@ para a v1.
    cp .env.example .env.local
    ```
 
-4. No dashboard do Supabase, habilite o provedor Google em
-   Authentication → Providers, e configure a URL de callback
-   `http://localhost:3000/auth/callback` (e a equivalente em produção).
-
-5. Rode o servidor de desenvolvimento:
+4. Rode o servidor de desenvolvimento:
 
    ```bash
    npm run dev
@@ -60,7 +56,6 @@ para a v1.
 /app
   /(auth)            login, cadastro
   /(app)             telas autenticadas (inicio, rank, treino, acompanhamento, perfil)
-  /auth/callback     troca do código OAuth por sessão
 /components          componentes reutilizáveis
 /lib
   /supabase          clients (browser/server) e tipos

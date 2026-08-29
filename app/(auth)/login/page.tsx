@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { login, loginComGoogle } from "./actions";
+import { login } from "./actions";
 
 export default async function LoginPage({
   searchParams,
@@ -48,21 +48,6 @@ export default async function LoginPage({
           className="mt-2 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover"
         >
           Entrar
-        </button>
-      </form>
-
-      <div className="flex items-center gap-2 text-xs text-foreground-secondary">
-        <div className="h-px flex-1 bg-border" />
-        ou
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      <form action={loginComGoogle}>
-        <button
-          type="submit"
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2 font-medium text-foreground transition-colors hover:bg-card"
-        >
-          Entrar com Google
         </button>
       </form>
 
