@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { Dumbbell, Plus } from "lucide-react";
+import { Dumbbell, Pencil, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import type { DiaSemana } from "@/lib/supabase/types";
+import { nomeDia, ordemDia } from "@/lib/utils/dias-semana";
 
 type TemplateComExercicios = {
   id: string;
   nome: string;
+  dia_semana: DiaSemana | null;
   template_exercises: {
     id: string;
     series: number;
@@ -29,36 +32,38 @@ export default async function TreinoPage() {
   const { data } = await supabase
     .from("workout_templates")
     .select(
-      "id, nome, template_exercises(id, series, rep_min, rep_max, ordem, exercises(id, nome, grupo_muscular, gif_url))"
+      "id, nome, dia_semana, template_exercises(id, series, rep_min, rep_max, ordem, exercises(id, nome, grupo_muscular, gif_url))"
     )
-    .eq("criado_por", user?.id ?? "")
-    .order("nome");
+    .eq("criado_por", user?.id ?? "");
 
   const templates = (data ?? []) as unknown as TemplateComExercicios[];
+  templates.sort((a, b) => ordemDia(a.dia_semana) - ordemDia(b.dia_semana));
+
+  const temFicha = templates.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold text-foreground">Treino</h1>
         <Link
-          href="/treino/adicionar"
+          href="/treino/montar"
           className="flex items-center gap-1 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-background transition-colors hover:bg-accent-hover"
         >
-          <Plus size={16} />
-          Exercício
+          {temFicha ? <Pencil size={16} /> : <Plus size={16} />}
+          {temFicha ? "Editar treino" : "Montar treino"}
         </Link>
       </div>
 
-      {templates.length === 0 ? (
+      {!temFicha ? (
         <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-foreground-secondary">
-          Nenhum treino montado ainda. Toca em &quot;Exercício&quot; pra
-          começar a adicionar os exercícios que seu personal passou.
+          Nenhuma ficha montada ainda. Toca em &quot;Montar treino&quot; pra
+          escolher os dias e os exercícios que seu personal passou.
         </div>
       ) : (
         templates.map((template) => (
           <div key={template.id} className="flex flex-col gap-2">
             <h2 className="text-sm font-medium text-foreground-secondary">
-              {template.nome}
+              {template.dia_semana ? nomeDia(template.dia_semana) : template.nome}
             </h2>
             <div className="flex flex-col gap-2">
               {[...template.template_exercises]

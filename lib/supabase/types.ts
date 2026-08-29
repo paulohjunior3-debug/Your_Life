@@ -3,6 +3,14 @@
 //   npx supabase gen types typescript --local > lib/supabase/types.ts
 
 export type Objetivo = "ganho" | "perda";
+export type DiaSemana =
+  | "segunda"
+  | "terca"
+  | "quarta"
+  | "quinta"
+  | "sexta"
+  | "sabado"
+  | "domingo";
 export type StatusSessao = "completo" | "parcial" | "nao_realizado";
 export type TipoTemporada = "semanal" | "trimestral";
 
@@ -65,12 +73,14 @@ export interface Database {
           nome: string;
           criado_por: string | null;
           criado_em: string;
+          dia_semana: DiaSemana | null;
         };
         Insert: {
           id?: string;
           nome: string;
           criado_por?: string | null;
           criado_em?: string;
+          dia_semana?: DiaSemana | null;
         };
         Update: Partial<
           Database["public"]["Tables"]["workout_templates"]["Insert"]
