@@ -25,6 +25,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   const [diaIndex, setDiaIndex] = useState(0);
   const [gruposSelecionados, setGruposSelecionados] = useState<string[]>([]);
   const [exerciciosTemp, setExerciciosTemp] = useState<string[]>([]);
+  const [buscaExercicio, setBuscaExercicio] = useState("");
   const [plano, setPlano] = useState<Plano>({});
   const [editandoDoResumo, setEditandoDoResumo] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -39,15 +40,18 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   }, [exercises]);
 
   const exerciciosPorGrupoSelecionado = useMemo(() => {
+    const termo = buscaExercicio.trim().toLowerCase();
     const map = new Map<string, Exercise[]>();
     for (const grupo of gruposSelecionados) {
-      map.set(
-        grupo,
-        exercises.filter((ex) => ex.grupo_muscular === grupo)
+      const lista = exercises.filter(
+        (ex) =>
+          ex.grupo_muscular === grupo &&
+          (termo === "" || ex.nome.toLowerCase().includes(termo))
       );
+      if (lista.length > 0) map.set(grupo, lista);
     }
     return map;
-  }, [exercises, gruposSelecionados]);
+  }, [exercises, gruposSelecionados, buscaExercicio]);
 
   const diaAtual = diasSelecionados[diaIndex];
 
@@ -74,6 +78,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
 
   function confirmarGrupos() {
     setExerciciosTemp([]);
+    setBuscaExercicio("");
     setFase("exercicios");
   }
 
@@ -260,6 +265,21 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
             Escolhe os exercícios
           </h2>
         </div>
+
+        <input
+          type="text"
+          placeholder="Buscar exercício..."
+          value={buscaExercicio}
+          onChange={(e) => setBuscaExercicio(e.target.value)}
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
+        />
+
+        {buscaExercicio.trim() !== "" &&
+          exerciciosPorGrupoSelecionado.size === 0 && (
+            <p className="text-center text-sm text-foreground-secondary">
+              Nenhum exercício encontrado.
+            </p>
+          )}
 
         {Array.from(exerciciosPorGrupoSelecionado.entries()).map(
           ([grupo, lista]) => (
