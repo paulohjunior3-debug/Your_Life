@@ -73,3 +73,11 @@ export function getFimSemanaBrasil(): string {
 export function getInicioMesBrasil(): string {
   return getDataHojeBrasil().slice(0, 8) + "01";
 }
+
+// Formata "yyyy-mm-dd" pro padrão brasileiro "dd/mm/aaaa", só pra exibição
+// -- todo cálculo/comparação continua usando o formato ISO.
+export function formatarDataBr(dataIso: string | null | undefined): string {
+  if (!dataIso) return "—";
+  const [ano, mes, dia] = dataIso.split("-");
+  return `${dia}/${mes}/${ano}`;
+}

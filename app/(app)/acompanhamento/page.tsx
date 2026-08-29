@@ -1,6 +1,6 @@
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
-import { getInicioSemanaDeData } from "@/lib/utils/data-brasil";
+import { formatarDataBr, getInicioSemanaDeData } from "@/lib/utils/data-brasil";
 import { PesoChart } from "./peso-chart";
 import { VolumeChart } from "./volume-chart";
 import { registrarPeso } from "./actions";
@@ -33,7 +33,7 @@ export default async function AcompanhamentoPage({
   ]);
 
   const dadosFixos = [
-    { label: "Data de início", value: profile?.data_inicio ?? "—" },
+    { label: "Data de início", value: formatarDataBr(profile?.data_inicio) },
     {
       label: "Peso inicial",
       value: profile?.peso_inicial_kg ? `${profile.peso_inicial_kg} kg` : "—",

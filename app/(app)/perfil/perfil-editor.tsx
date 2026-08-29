@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import type { Database } from "@/lib/supabase/types";
+import { formatarDataBr } from "@/lib/utils/data-brasil";
 import { updateProfile } from "./actions";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -30,7 +31,7 @@ const CAMPOS_LEITURA: { label: string; value: (p: Profile) => string }[] = [
           ? "Perda de peso"
           : "—",
   },
-  { label: "Data de início", value: (p) => p.data_inicio ?? "—" },
+  { label: "Data de início", value: (p) => formatarDataBr(p.data_inicio) },
 ];
 
 export function PerfilEditor({
@@ -202,7 +203,7 @@ export function PerfilEditor({
       <div className="flex items-center justify-between px-1 py-1">
         <span className={labelClass}>Data de início</span>
         <span className="text-sm text-foreground">
-          {profile?.data_inicio ?? "—"}
+          {formatarDataBr(profile?.data_inicio)}
         </span>
       </div>
 
