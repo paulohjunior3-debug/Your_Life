@@ -217,12 +217,14 @@ export interface Database {
           user_id: string;
           ativo: boolean;
           criado_em: string;
+          ativo_desde: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
           ativo?: boolean;
           criado_em?: string;
+          ativo_desde?: string | null;
         };
         Update: Partial<
           Database["public"]["Tables"]["race_optins"]["Insert"]
@@ -277,6 +279,18 @@ export interface Database {
         Relationships: [];
       };
     };
-    Functions: Record<string, never>;
+    Functions: {
+      ranking_semana_atual: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          nome: string;
+          avatar_url: string | null;
+          treinos_concluidos: number;
+          variacao_volume: number;
+          pontos: number;
+        }[];
+      };
+    };
   };
 }
