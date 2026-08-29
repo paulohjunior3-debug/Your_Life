@@ -31,3 +31,41 @@ export function getDiaSemanaHojeBrasil(): DiaSemana {
   }).format(new Date());
   return WEEKDAY_PARA_DIA_SEMANA[weekday];
 }
+
+const DIA_SEMANA_POR_INDICE: DiaSemana[] = [
+  "domingo",
+  "segunda",
+  "terca",
+  "quarta",
+  "quinta",
+  "sexta",
+  "sabado",
+];
+
+function addDias(dataIso: string, dias: number): string {
+  const d = new Date(dataIso + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+export function getDiaSemanaDeData(dataIso: string): DiaSemana {
+  const d = new Date(dataIso + "T00:00:00Z");
+  return DIA_SEMANA_POR_INDICE[d.getUTCDay()];
+}
+
+// Segunda-feira da semana atual (fuso Brasília), como "yyyy-mm-dd".
+export function getInicioSemanaBrasil(): string {
+  const hoje = getDataHojeBrasil();
+  const indice = DIA_SEMANA_POR_INDICE.indexOf(getDiaSemanaDeData(hoje));
+  const diffParaSegunda = indice === 0 ? -6 : 1 - indice;
+  return addDias(hoje, diffParaSegunda);
+}
+
+export function getFimSemanaBrasil(): string {
+  return addDias(getInicioSemanaBrasil(), 6);
+}
+
+// Primeiro dia do mês atual (fuso Brasília), como "yyyy-mm-dd".
+export function getInicioMesBrasil(): string {
+  return getDataHojeBrasil().slice(0, 8) + "01";
+}
