@@ -36,7 +36,8 @@ export default async function TreinoPage() {
     .select(
       "id, nome, dia_semana, template_exercises(id, series, rep_min, rep_max, ordem, exercises(id, nome, grupo_muscular, gif_url))"
     )
-    .eq("criado_por", user?.id ?? "");
+    .eq("criado_por", user?.id ?? "")
+    .not("dia_semana", "is", null);
 
   const templates = (data ?? []) as unknown as TemplateComExercicios[];
   templates.sort((a, b) => ordemDia(a.dia_semana) - ordemDia(b.dia_semana));

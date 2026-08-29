@@ -12,7 +12,7 @@ type Exercise = Pick<
   "id" | "nome" | "grupo_muscular" | "gif_url"
 >;
 
-type Fase = "dias" | "musculo" | "exercicios" | "mais" | "resumo";
+type Fase = "dias" | "musculo" | "exercicios" | "resumo";
 
 type Plano = Partial<Record<DiaSemana, string[]>>;
 
@@ -23,7 +23,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   const [fase, setFase] = useState<Fase>("dias");
   const [diasSelecionados, setDiasSelecionados] = useState<DiaSemana[]>([]);
   const [diaIndex, setDiaIndex] = useState(0);
-  const [grupoAtual, setGrupoAtual] = useState<string | null>(null);
+  const [gruposSelecionados, setGruposSelecionados] = useState<string[]>([]);
   const [exerciciosTemp, setExerciciosTemp] = useState<string[]>([]);
   const [plano, setPlano] = useState<Plano>({});
   const [editandoDoResumo, setEditandoDoResumo] = useState(false);
@@ -38,10 +38,16 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     return Array.from(set).sort();
   }, [exercises]);
 
-  const exerciciosDoGrupo = useMemo(
-    () => exercises.filter((ex) => ex.grupo_muscular === grupoAtual),
-    [exercises, grupoAtual]
-  );
+  const exerciciosPorGrupoSelecionado = useMemo(() => {
+    const map = new Map<string, Exercise[]>();
+    for (const grupo of gruposSelecionados) {
+      map.set(
+        grupo,
+        exercises.filter((ex) => ex.grupo_muscular === grupo)
+      );
+    }
+    return map;
+  }, [exercises, gruposSelecionados]);
 
   const diaAtual = diasSelecionados[diaIndex];
 
@@ -60,8 +66,13 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     setFase("musculo");
   }
 
-  function selecionarGrupo(grupo: string) {
-    setGrupoAtual(grupo);
+  function alternarGrupo(grupo: string) {
+    setGruposSelecionados((prev) =>
+      prev.includes(grupo) ? prev.filter((g) => g !== grupo) : [...prev, grupo]
+    );
+  }
+
+  function confirmarGrupos() {
     setExerciciosTemp([]);
     setFase("exercicios");
   }
@@ -72,19 +83,6 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     );
   }
 
-  function confirmarExercicios() {
-    setPlano((prev) => ({
-      ...prev,
-      [diaAtual]: [...(prev[diaAtual] ?? []), ...exerciciosTemp],
-    }));
-    setFase("mais");
-  }
-
-  function adicionarOutroGrupo() {
-    setGrupoAtual(null);
-    setFase("musculo");
-  }
-
   function proximoDia() {
     if (editandoDoResumo) {
       setEditandoDoResumo(false);
@@ -93,17 +91,25 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     }
     if (diaIndex + 1 < diasSelecionados.length) {
       setDiaIndex((i) => i + 1);
-      setGrupoAtual(null);
+      setGruposSelecionados([]);
       setFase("musculo");
     } else {
       setFase("resumo");
     }
   }
 
+  function confirmarExercicios() {
+    setPlano((prev) => ({
+      ...prev,
+      [diaAtual]: [...(prev[diaAtual] ?? []), ...exerciciosTemp],
+    }));
+    proximoDia();
+  }
+
   function editarDia(dia: DiaSemana) {
     setPlano((prev) => ({ ...prev, [dia]: [] }));
     setDiaIndex(diasSelecionados.indexOf(dia));
-    setGrupoAtual(null);
+    setGruposSelecionados([]);
     setEditandoDoResumo(true);
     setFase("musculo");
   }
@@ -200,21 +206,36 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
         </div>
 
         <p className="text-sm text-foreground-secondary">
-          Qual grupo muscular você vai treinar nesse dia?
+          Quais grupos musculares você vai treinar nesse dia?
         </p>
 
         <div className="flex flex-col gap-2">
-          {grupos.map((grupo) => (
-            <button
-              key={grupo}
-              type="button"
-              onClick={() => selecionarGrupo(grupo)}
-              className={`${cardBase} text-left text-foreground hover:bg-surface`}
-            >
-              {grupo}
-            </button>
-          ))}
+          {grupos.map((grupo) => {
+            const selecionado = gruposSelecionados.includes(grupo);
+            return (
+              <button
+                key={grupo}
+                type="button"
+                onClick={() => alternarGrupo(grupo)}
+                className={`${cardBase} flex items-center justify-between text-left ${
+                  selecionado ? "border-accent" : "hover:bg-surface"
+                }`}
+              >
+                <span className="text-foreground">{grupo}</span>
+                {selecionado && <Check size={18} className="text-accent" />}
+              </button>
+            );
+          })}
         </div>
+
+        <button
+          type="button"
+          disabled={gruposSelecionados.length === 0}
+          onClick={confirmarGrupos}
+          className="mt-2 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover disabled:opacity-40"
+        >
+          Continuar
+        </button>
       </div>
     );
   }
@@ -228,7 +249,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
           className="flex w-fit items-center gap-1 text-sm text-foreground-secondary hover:text-foreground"
         >
           <ChevronLeft size={16} />
-          Trocar grupo muscular
+          Trocar grupos musculares
         </button>
 
         <div>
@@ -236,40 +257,51 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
             {nomeDia(diaAtual)}
           </p>
           <h2 className="text-lg font-semibold text-foreground">
-            {grupoAtual}
+            Escolhe os exercícios
           </h2>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {exerciciosDoGrupo.map((ex) => {
-            const selecionado = exerciciosTemp.includes(ex.id);
-            return (
-              <button
-                key={ex.id}
-                type="button"
-                onClick={() => alternarExercicio(ex.id)}
-                className={`${cardBase} flex items-center gap-3 text-left ${
-                  selecionado ? "border-accent" : "hover:bg-surface"
-                }`}
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface text-foreground-secondary">
-                  {ex.gif_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={ex.gif_url}
-                      alt={ex.nome}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Dumbbell size={20} />
-                  )}
-                </div>
-                <span className="flex-1 text-foreground">{ex.nome}</span>
-                {selecionado && <Check size={18} className="text-accent" />}
-              </button>
-            );
-          })}
-        </div>
+        {Array.from(exerciciosPorGrupoSelecionado.entries()).map(
+          ([grupo, lista]) => (
+            <div key={grupo} className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium text-foreground-secondary">
+                {grupo}
+              </h3>
+              <div className="flex flex-col gap-2">
+                {lista.map((ex) => {
+                  const selecionado = exerciciosTemp.includes(ex.id);
+                  return (
+                    <button
+                      key={ex.id}
+                      type="button"
+                      onClick={() => alternarExercicio(ex.id)}
+                      className={`${cardBase} flex items-center gap-3 text-left ${
+                        selecionado ? "border-accent" : "hover:bg-surface"
+                      }`}
+                    >
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface text-foreground-secondary">
+                        {ex.gif_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={ex.gif_url}
+                            alt={ex.nome}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <Dumbbell size={20} />
+                        )}
+                      </div>
+                      <span className="flex-1 text-foreground">{ex.nome}</span>
+                      {selecionado && (
+                        <Check size={18} className="text-accent" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )
+        )}
 
         <button
           type="button"
@@ -277,35 +309,12 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
           onClick={confirmarExercicios}
           className="mt-2 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover disabled:opacity-40"
         >
-          Confirmar ({exerciciosTemp.length})
+          {editandoDoResumo
+            ? `Salvar (${exerciciosTemp.length})`
+            : diaIndex + 1 < diasSelecionados.length
+              ? `Confirmar e ir pro próximo dia (${exerciciosTemp.length})`
+              : `Confirmar (${exerciciosTemp.length})`}
         </button>
-      </div>
-    );
-  }
-
-  if (fase === "mais") {
-    return (
-      <div className="flex flex-col gap-4">
-        <p className="text-center text-foreground">
-          Adicionar mais algum grupo muscular pra{" "}
-          <strong>{nomeDia(diaAtual)}</strong>?
-        </p>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={adicionarOutroGrupo}
-            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 font-medium text-foreground transition-colors hover:bg-card"
-          >
-            Sim
-          </button>
-          <button
-            type="button"
-            onClick={proximoDia}
-            className="flex-1 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover"
-          >
-            {editandoDoResumo ? "Não, voltar ao resumo" : "Não, próximo"}
-          </button>
-        </div>
       </div>
     );
   }
