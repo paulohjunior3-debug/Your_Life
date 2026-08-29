@@ -26,6 +26,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   const [grupoAtual, setGrupoAtual] = useState<string | null>(null);
   const [exerciciosTemp, setExerciciosTemp] = useState<string[]>([]);
   const [plano, setPlano] = useState<Plano>({});
+  const [editandoDoResumo, setEditandoDoResumo] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erroEnvio, setErroEnvio] = useState<string | null>(null);
 
@@ -85,6 +86,11 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   }
 
   function proximoDia() {
+    if (editandoDoResumo) {
+      setEditandoDoResumo(false);
+      setFase("resumo");
+      return;
+    }
     if (diaIndex + 1 < diasSelecionados.length) {
       setDiaIndex((i) => i + 1);
       setGrupoAtual(null);
@@ -92,6 +98,14 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     } else {
       setFase("resumo");
     }
+  }
+
+  function editarDia(dia: DiaSemana) {
+    setPlano((prev) => ({ ...prev, [dia]: [] }));
+    setDiaIndex(diasSelecionados.indexOf(dia));
+    setGrupoAtual(null);
+    setEditandoDoResumo(true);
+    setFase("musculo");
   }
 
   async function concluir() {
@@ -162,11 +176,18 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
       <div className="flex flex-col gap-4">
         <button
           type="button"
-          onClick={() => setFase("dias")}
+          onClick={() => {
+            if (editandoDoResumo) {
+              setEditandoDoResumo(false);
+              setFase("resumo");
+            } else {
+              setFase("dias");
+            }
+          }}
           className="flex w-fit items-center gap-1 text-sm text-foreground-secondary hover:text-foreground"
         >
           <ChevronLeft size={16} />
-          Escolher dias de novo
+          {editandoDoResumo ? "Voltar ao resumo" : "Escolher dias de novo"}
         </button>
 
         <div>
@@ -282,7 +303,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
             onClick={proximoDia}
             className="flex-1 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover"
           >
-            Não, próximo
+            {editandoDoResumo ? "Não, voltar ao resumo" : "Não, próximo"}
           </button>
         </div>
       </div>
@@ -310,7 +331,16 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
           );
           return (
             <div key={dia} className={cardBase}>
-              <p className="font-medium text-foreground">{nomeDia(dia)}</p>
+              <div className="flex items-center justify-between">
+                <p className="font-medium text-foreground">{nomeDia(dia)}</p>
+                <button
+                  type="button"
+                  onClick={() => editarDia(dia)}
+                  className="text-xs font-medium text-accent hover:text-accent-hover"
+                >
+                  Editar
+                </button>
+              </div>
               {nomes.length === 0 ? (
                 <p className="text-sm text-foreground-secondary">
                   Nenhum exercício adicionado.
