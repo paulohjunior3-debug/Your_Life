@@ -53,12 +53,16 @@ export function getDiaSemanaDeData(dataIso: string): DiaSemana {
   return DIA_SEMANA_POR_INDICE[d.getUTCDay()];
 }
 
+// Segunda-feira da semana de uma data qualquer, como "yyyy-mm-dd".
+export function getInicioSemanaDeData(dataIso: string): string {
+  const indice = DIA_SEMANA_POR_INDICE.indexOf(getDiaSemanaDeData(dataIso));
+  const diffParaSegunda = indice === 0 ? -6 : 1 - indice;
+  return addDias(dataIso, diffParaSegunda);
+}
+
 // Segunda-feira da semana atual (fuso Brasília), como "yyyy-mm-dd".
 export function getInicioSemanaBrasil(): string {
-  const hoje = getDataHojeBrasil();
-  const indice = DIA_SEMANA_POR_INDICE.indexOf(getDiaSemanaDeData(hoje));
-  const diffParaSegunda = indice === 0 ? -6 : 1 - indice;
-  return addDias(hoje, diffParaSegunda);
+  return getInicioSemanaDeData(getDataHojeBrasil());
 }
 
 export function getFimSemanaBrasil(): string {

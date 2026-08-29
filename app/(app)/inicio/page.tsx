@@ -24,6 +24,7 @@ export default async function InicioPage() {
     { count: treinosNaSemana },
     { data: templatesDoUsuario },
     { count: treinosNoMes },
+    { data: ultimoPeso },
   ] = await Promise.all([
     supabase.rpc("ranking_semana_atual"),
     supabase
@@ -45,6 +46,13 @@ export default async function InicioPage() {
       .eq("status", "completo")
       .gte("data", inicioMes)
       .lte("data", dataHoje),
+    supabase
+      .from("body_logs")
+      .select("peso_kg")
+      .eq("user_id", user?.id ?? "")
+      .order("semana", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const diasDeTreino = new Set(
@@ -58,9 +66,23 @@ export default async function InicioPage() {
     d = proximo.toISOString().slice(0, 10);
   }
 
+  const pesoInicial = profile?.peso_inicial_kg ?? null;
+  const pesoAtual = ultimoPeso?.peso_kg ?? pesoInicial;
+  const variacao =
+    pesoAtual != null && pesoInicial != null ? pesoAtual - pesoInicial : null;
+
   const metrics = [
-    { label: "Peso atual", value: "—" },
-    { label: "Variação", value: "—" },
+    {
+      label: "Peso atual",
+      value: pesoAtual != null ? `${pesoAtual} kg` : "—",
+    },
+    {
+      label: "Variação",
+      value:
+        variacao != null
+          ? `${variacao > 0 ? "+" : ""}${variacao.toFixed(1)} kg`
+          : "—",
+    },
     { label: "Treinos na semana", value: String(treinosNaSemana ?? 0) },
     {
       label: "Streak",
