@@ -57,9 +57,43 @@ body {
 @keyframes flutuar {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-6px) rotate(-6deg);
+  }
+  75% {
+    transform: translateY(4px) rotate(5deg);
+  }
+}
+
+@keyframes entrar-pista {
+  0% {
+    transform: translateX(-60px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes brilho-lider {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px var(--podium-gold));
   }
   50% {
-    transform: translateY(-3px);
+    filter: drop-shadow(0 0 7px var(--podium-gold));
+  }
+}
+
+@keyframes brilho-eu {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px var(--accent));
+  }
+  50% {
+    filter: drop-shadow(0 0 6px var(--accent));
   }
 }
