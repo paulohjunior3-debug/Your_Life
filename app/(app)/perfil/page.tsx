@@ -2,7 +2,7 @@ import { getUserAndProfile } from "@/lib/supabase/get-profile";
 import { signOut } from "@/lib/actions/sign-out";
 import { pesoInicialTravado } from "@/lib/utils/peso-inicial";
 import { PerfilEditor } from "./perfil-editor";
-import { User } from "lucide-react";
+import { AvatarUpload } from "./avatar-upload";
 
 export default async function PerfilPage({
   searchParams,
@@ -17,9 +17,10 @@ export default async function PerfilPage({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col items-center gap-2 py-2">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-surface text-foreground-secondary">
-          <User size={28} />
-        </div>
+        <AvatarUpload
+          avatarUrl={profile?.avatar_url ?? null}
+          nome={profile?.nome ?? "Perfil"}
+        />
         <h1 className="text-lg font-semibold text-foreground">
           {profile?.nome ?? "Perfil"}
         </h1>
