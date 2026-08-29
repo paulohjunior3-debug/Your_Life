@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f1115;
+  --card: #191c22;
+  --surface: #22262e;
+  --border: #2e3440;
+  --foreground: #f2f4f7;
+  --foreground-secondary: #9aa3b2;
+
+  --accent: #c6f432;
+  --accent-hover: #d4ff4d;
+
+  --status-complete: #34d399;
+  --status-partial: #fbbf24;
+  --status-missed: #f87171;
+  --status-info: #60a5fa;
+
+  --podium-gold: #f5c542;
+  --podium-silver: #c0c7d0;
+  --podium-bronze: #cd8b52;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+
+  --color-status-complete: var(--status-complete);
+  --color-status-partial: var(--status-partial);
+  --color-status-missed: var(--status-missed);
+  --color-status-info: var(--status-info);
+
+  --color-podium-gold: var(--podium-gold);
+  --color-podium-silver: var(--podium-silver);
+  --color-podium-bronze: var(--podium-bronze);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
