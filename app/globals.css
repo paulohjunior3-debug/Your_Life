@@ -53,3 +53,13 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+@keyframes flutuar {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}

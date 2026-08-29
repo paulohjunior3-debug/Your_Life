@@ -1,7 +1,13 @@
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
+import { PistaCorrida } from "./pista-corrida";
 
 export default async function InicioPage() {
-  const { profile } = await getUserAndProfile();
+  const supabase = await createClient();
+  const { user, profile } = await getUserAndProfile();
+
+  const { data: ranking } = await supabase.rpc("ranking_semana_atual");
 
   const metrics = [
     { label: "Peso atual", value: "—" },
@@ -19,9 +25,22 @@ export default async function InicioPage() {
         </h1>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 text-center text-sm text-foreground-secondary">
-        Mapa da corrida chega na v1
-      </div>
+      <Link
+        href="/rank"
+        className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4"
+        style={{ maxHeight: 200 }}
+      >
+        <p className="text-xs font-medium text-foreground-secondary">
+          Corrida desta semana
+        </p>
+        {ranking && ranking.length > 0 ? (
+          <PistaCorrida pilotos={ranking} userIdAtual={user?.id ?? ""} />
+        ) : (
+          <p className="text-center text-sm text-foreground-secondary">
+            Ninguém correndo essa semana ainda. Ative o opt-in na aba Rank.
+          </p>
+        )}
+      </Link>
 
       <div className="grid grid-cols-2 gap-3">
         {metrics.map((metric) => (
