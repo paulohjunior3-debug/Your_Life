@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function AuthLayout({
   children,
 }: {
@@ -6,9 +8,14 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
-        <h1 className="mb-6 text-center text-xl font-semibold text-foreground">
-          Your Life
-        </h1>
+        <Image
+          src="/logo.png"
+          alt="Your Life"
+          width={512}
+          height={512}
+          className="mx-auto mb-4 h-28 w-28 rounded-xl"
+          priority
+        />
         {children}
       </div>
     </div>
