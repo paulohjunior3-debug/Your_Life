@@ -284,10 +284,14 @@ export interface Database {
           cintura_cm: number | null;
           abdomen_cm: number | null;
           quadril_cm: number | null;
-          coxa_cm: number | null;
-          panturrilha_cm: number | null;
-          braco_contraido_cm: number | null;
-          braco_relaxado_cm: number | null;
+          coxa_direita_cm: number | null;
+          coxa_esquerda_cm: number | null;
+          panturrilha_direita_cm: number | null;
+          panturrilha_esquerda_cm: number | null;
+          braco_contraido_direito_cm: number | null;
+          braco_contraido_esquerdo_cm: number | null;
+          braco_relaxado_direito_cm: number | null;
+          braco_relaxado_esquerdo_cm: number | null;
           criado_em: string;
         };
         Insert: {
@@ -308,10 +312,14 @@ export interface Database {
           cintura_cm?: number | null;
           abdomen_cm?: number | null;
           quadril_cm?: number | null;
-          coxa_cm?: number | null;
-          panturrilha_cm?: number | null;
-          braco_contraido_cm?: number | null;
-          braco_relaxado_cm?: number | null;
+          coxa_direita_cm?: number | null;
+          coxa_esquerda_cm?: number | null;
+          panturrilha_direita_cm?: number | null;
+          panturrilha_esquerda_cm?: number | null;
+          braco_contraido_direito_cm?: number | null;
+          braco_contraido_esquerdo_cm?: number | null;
+          braco_relaxado_direito_cm?: number | null;
+          braco_relaxado_esquerdo_cm?: number | null;
           criado_em?: string;
         };
         Update: Partial<

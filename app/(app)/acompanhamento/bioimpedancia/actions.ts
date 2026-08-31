@@ -43,10 +43,26 @@ export async function registrarBioimpedancia(formData: FormData) {
     cintura_cm: numeroOuNull(formData.get("cintura_cm")),
     abdomen_cm: numeroOuNull(formData.get("abdomen_cm")),
     quadril_cm: numeroOuNull(formData.get("quadril_cm")),
-    coxa_cm: numeroOuNull(formData.get("coxa_cm")),
-    panturrilha_cm: numeroOuNull(formData.get("panturrilha_cm")),
-    braco_contraido_cm: numeroOuNull(formData.get("braco_contraido_cm")),
-    braco_relaxado_cm: numeroOuNull(formData.get("braco_relaxado_cm")),
+    coxa_direita_cm: numeroOuNull(formData.get("coxa_direita_cm")),
+    coxa_esquerda_cm: numeroOuNull(formData.get("coxa_esquerda_cm")),
+    panturrilha_direita_cm: numeroOuNull(
+      formData.get("panturrilha_direita_cm")
+    ),
+    panturrilha_esquerda_cm: numeroOuNull(
+      formData.get("panturrilha_esquerda_cm")
+    ),
+    braco_contraido_direito_cm: numeroOuNull(
+      formData.get("braco_contraido_direito_cm")
+    ),
+    braco_contraido_esquerdo_cm: numeroOuNull(
+      formData.get("braco_contraido_esquerdo_cm")
+    ),
+    braco_relaxado_direito_cm: numeroOuNull(
+      formData.get("braco_relaxado_direito_cm")
+    ),
+    braco_relaxado_esquerdo_cm: numeroOuNull(
+      formData.get("braco_relaxado_esquerdo_cm")
+    ),
   });
 
   if (error) {

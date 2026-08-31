@@ -79,24 +79,58 @@ const CAMPOS_MEDIDAS: Campo[] = [
   { name: "cintura_cm", label: "Cintura", sufixo: "cm", step: "0.5", grupo: "medidas" },
   { name: "abdomen_cm", label: "Abdômen", sufixo: "cm", step: "0.5", grupo: "medidas" },
   { name: "quadril_cm", label: "Quadril/glúteo", sufixo: "cm", step: "0.5", grupo: "medidas" },
-  { name: "coxa_cm", label: "Coxa", sufixo: "cm", step: "0.5", grupo: "medidas" },
   {
-    name: "panturrilha_cm",
-    label: "Panturrilha",
+    name: "coxa_direita_cm",
+    label: "Coxa direita",
     sufixo: "cm",
     step: "0.5",
     grupo: "medidas",
   },
   {
-    name: "braco_contraido_cm",
-    label: "Braço contraído",
+    name: "coxa_esquerda_cm",
+    label: "Coxa esquerda",
     sufixo: "cm",
     step: "0.5",
     grupo: "medidas",
   },
   {
-    name: "braco_relaxado_cm",
-    label: "Braço relaxado",
+    name: "panturrilha_direita_cm",
+    label: "Panturrilha direita",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "panturrilha_esquerda_cm",
+    label: "Panturrilha esquerda",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_contraido_direito_cm",
+    label: "Braço direito contraído",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_contraido_esquerdo_cm",
+    label: "Braço esquerdo contraído",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_relaxado_direito_cm",
+    label: "Braço direito relaxado",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_relaxado_esquerdo_cm",
+    label: "Braço esquerdo relaxado",
     sufixo: "cm",
     step: "0.5",
     grupo: "medidas",
@@ -117,7 +151,7 @@ export default async function BioimpedanciaPage({
   const { data: registros } = await supabase
     .from("bioimpedancia_logs")
     .select(
-      "id, data, peso_kg, percentual_gordura, massa_magra_kg, massa_muscular_kg, agua_corporal_pct, massa_ossea_kg, gordura_visceral, taxa_metabolica_basal, idade_metabolica, pescoco_cm, peito_cm, cintura_cm, abdomen_cm, quadril_cm, coxa_cm, panturrilha_cm, braco_contraido_cm, braco_relaxado_cm"
+      "id, data, peso_kg, percentual_gordura, massa_magra_kg, massa_muscular_kg, agua_corporal_pct, massa_ossea_kg, gordura_visceral, taxa_metabolica_basal, idade_metabolica, pescoco_cm, peito_cm, cintura_cm, abdomen_cm, quadril_cm, coxa_direita_cm, coxa_esquerda_cm, panturrilha_direita_cm, panturrilha_esquerda_cm, braco_contraido_direito_cm, braco_contraido_esquerdo_cm, braco_relaxado_direito_cm, braco_relaxado_esquerdo_cm"
     )
     .eq("user_id", user?.id ?? "")
     .order("data", { ascending: false });
