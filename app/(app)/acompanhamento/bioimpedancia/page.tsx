@@ -5,52 +5,105 @@ import { createClient } from "@/lib/supabase/server";
 import { getDataHojeBrasil, formatarDataBr } from "@/lib/utils/data-brasil";
 import { registrarBioimpedancia, excluirBioimpedancia } from "./actions";
 
-const CAMPOS: {
+type Campo = {
   name: string;
   label: string;
   sufixo: string;
   step: string;
-}[] = [
-  { name: "peso_kg", label: "Peso", sufixo: "kg", step: "0.1" },
+  grupo: "composicao" | "medidas";
+};
+
+const CAMPOS_COMPOSICAO: Campo[] = [
+  { name: "peso_kg", label: "Peso", sufixo: "kg", step: "0.1", grupo: "composicao" },
   {
     name: "percentual_gordura",
     label: "Gordura corporal",
     sufixo: "%",
     step: "0.1",
+    grupo: "composicao",
   },
-  { name: "massa_magra_kg", label: "Massa magra", sufixo: "kg", step: "0.1" },
+  {
+    name: "massa_magra_kg",
+    label: "Massa magra",
+    sufixo: "kg",
+    step: "0.1",
+    grupo: "composicao",
+  },
   {
     name: "massa_muscular_kg",
     label: "Massa muscular",
     sufixo: "kg",
     step: "0.1",
+    grupo: "composicao",
   },
   {
     name: "agua_corporal_pct",
     label: "Água corporal",
     sufixo: "%",
     step: "0.1",
+    grupo: "composicao",
   },
-  { name: "massa_ossea_kg", label: "Massa óssea", sufixo: "kg", step: "0.1" },
+  {
+    name: "massa_ossea_kg",
+    label: "Massa óssea",
+    sufixo: "kg",
+    step: "0.1",
+    grupo: "composicao",
+  },
   {
     name: "gordura_visceral",
     label: "Gordura visceral",
     sufixo: "",
     step: "1",
+    grupo: "composicao",
   },
   {
     name: "taxa_metabolica_basal",
     label: "Taxa metabólica basal",
     sufixo: "kcal",
     step: "1",
+    grupo: "composicao",
   },
   {
     name: "idade_metabolica",
     label: "Idade metabólica",
     sufixo: "anos",
     step: "1",
+    grupo: "composicao",
   },
 ];
+
+const CAMPOS_MEDIDAS: Campo[] = [
+  { name: "pescoco_cm", label: "Pescoço", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  { name: "peito_cm", label: "Peito", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  { name: "cintura_cm", label: "Cintura", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  { name: "abdomen_cm", label: "Abdômen", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  { name: "quadril_cm", label: "Quadril/glúteo", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  { name: "coxa_cm", label: "Coxa", sufixo: "cm", step: "0.5", grupo: "medidas" },
+  {
+    name: "panturrilha_cm",
+    label: "Panturrilha",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_contraido_cm",
+    label: "Braço contraído",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+  {
+    name: "braco_relaxado_cm",
+    label: "Braço relaxado",
+    sufixo: "cm",
+    step: "0.5",
+    grupo: "medidas",
+  },
+];
+
+const CAMPOS: Campo[] = [...CAMPOS_COMPOSICAO, ...CAMPOS_MEDIDAS];
 
 export default async function BioimpedanciaPage({
   searchParams,
@@ -64,7 +117,7 @@ export default async function BioimpedanciaPage({
   const { data: registros } = await supabase
     .from("bioimpedancia_logs")
     .select(
-      "id, data, peso_kg, percentual_gordura, massa_magra_kg, massa_muscular_kg, agua_corporal_pct, massa_ossea_kg, gordura_visceral, taxa_metabolica_basal, idade_metabolica"
+      "id, data, peso_kg, percentual_gordura, massa_magra_kg, massa_muscular_kg, agua_corporal_pct, massa_ossea_kg, gordura_visceral, taxa_metabolica_basal, idade_metabolica, pescoco_cm, peito_cm, cintura_cm, abdomen_cm, quadril_cm, coxa_cm, panturrilha_cm, braco_contraido_cm, braco_relaxado_cm"
     )
     .eq("user_id", user?.id ?? "")
     .order("data", { ascending: false });
@@ -114,8 +167,11 @@ export default async function BioimpedanciaPage({
             />
           </div>
 
+          <p className="text-xs font-medium text-foreground-secondary">
+            Composição corporal
+          </p>
           <div className="grid grid-cols-2 gap-3">
-            {CAMPOS.map((campo, i) => (
+            {CAMPOS_COMPOSICAO.map((campo, i) => (
               <div key={campo.name} className="flex flex-col gap-1">
                 <label
                   htmlFor={campo.name}
@@ -131,6 +187,30 @@ export default async function BioimpedanciaPage({
                   step={campo.step}
                   min={0}
                   required={i === 0}
+                  className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
+                />
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-1 text-xs font-medium text-foreground-secondary">
+            Medidas (circunferência)
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {CAMPOS_MEDIDAS.map((campo) => (
+              <div key={campo.name} className="flex flex-col gap-1">
+                <label
+                  htmlFor={campo.name}
+                  className="text-xs text-foreground-secondary"
+                >
+                  {campo.label} ({campo.sufixo})
+                </label>
+                <input
+                  id={campo.name}
+                  type="number"
+                  name={campo.name}
+                  step={campo.step}
+                  min={0}
                   className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
                 />
               </div>

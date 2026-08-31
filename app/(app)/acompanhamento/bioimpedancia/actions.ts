@@ -38,6 +38,15 @@ export async function registrarBioimpedancia(formData: FormData) {
       formData.get("taxa_metabolica_basal")
     ),
     idade_metabolica: numeroOuNull(formData.get("idade_metabolica")),
+    pescoco_cm: numeroOuNull(formData.get("pescoco_cm")),
+    peito_cm: numeroOuNull(formData.get("peito_cm")),
+    cintura_cm: numeroOuNull(formData.get("cintura_cm")),
+    abdomen_cm: numeroOuNull(formData.get("abdomen_cm")),
+    quadril_cm: numeroOuNull(formData.get("quadril_cm")),
+    coxa_cm: numeroOuNull(formData.get("coxa_cm")),
+    panturrilha_cm: numeroOuNull(formData.get("panturrilha_cm")),
+    braco_contraido_cm: numeroOuNull(formData.get("braco_contraido_cm")),
+    braco_relaxado_cm: numeroOuNull(formData.get("braco_relaxado_cm")),
   });
 
   if (error) {

@@ -279,6 +279,15 @@ export interface Database {
           gordura_visceral: number | null;
           taxa_metabolica_basal: number | null;
           idade_metabolica: number | null;
+          pescoco_cm: number | null;
+          peito_cm: number | null;
+          cintura_cm: number | null;
+          abdomen_cm: number | null;
+          quadril_cm: number | null;
+          coxa_cm: number | null;
+          panturrilha_cm: number | null;
+          braco_contraido_cm: number | null;
+          braco_relaxado_cm: number | null;
           criado_em: string;
         };
         Insert: {
@@ -294,6 +303,15 @@ export interface Database {
           gordura_visceral?: number | null;
           taxa_metabolica_basal?: number | null;
           idade_metabolica?: number | null;
+          pescoco_cm?: number | null;
+          peito_cm?: number | null;
+          cintura_cm?: number | null;
+          abdomen_cm?: number | null;
+          quadril_cm?: number | null;
+          coxa_cm?: number | null;
+          panturrilha_cm?: number | null;
+          braco_contraido_cm?: number | null;
+          braco_relaxado_cm?: number | null;
           criado_em?: string;
         };
         Update: Partial<
