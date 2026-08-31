@@ -13,6 +13,15 @@ const inputClass =
 const labelClass = "text-sm text-foreground-secondary";
 
 const CAMPOS_LEITURA: { label: string; value: (p: Profile) => string }[] = [
+  {
+    label: "Sexo biológico",
+    value: (p) =>
+      p.sexo === "masculino"
+        ? "Masculino"
+        : p.sexo === "feminino"
+          ? "Feminino"
+          : "—",
+  },
   { label: "Idade", value: (p) => (p.idade ? String(p.idade) : "—") },
   { label: "Telefone", value: (p) => p.telefone ?? "—" },
   { label: "Academia", value: (p) => p.academia ?? "—" },
@@ -77,6 +86,32 @@ export function PerfilEditor({
 
   return (
     <form action={updateProfile} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <span className={labelClass}>Sexo biológico</span>
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              { value: "masculino", label: "Masculino" },
+              { value: "feminino", label: "Feminino" },
+            ] as const
+          ).map((opcao) => (
+            <label
+              key={opcao.value}
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-foreground has-[:checked]:border-accent has-[:checked]:bg-accent has-[:checked]:text-background"
+            >
+              <input
+                type="radio"
+                name="sexo"
+                value={opcao.value}
+                defaultChecked={profile?.sexo === opcao.value}
+                className="sr-only"
+              />
+              {opcao.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-1">
         <label htmlFor="nome" className={labelClass}>
           Nome

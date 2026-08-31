@@ -15,7 +15,7 @@ function parseOptionalText(value: FormDataEntryValue | null) {
   return str === "" ? null : str;
 }
 
-export async function updateProfile(formData: FormData) {
+export async function salvarOnboarding(formData: FormData) {
   const supabase = await createClient();
 
   const {
@@ -26,16 +26,18 @@ export async function updateProfile(formData: FormData) {
     redirect("/login");
   }
 
+  const sexo = String(formData.get("sexo") ?? "");
+  if (sexo !== "masculino" && sexo !== "feminino") {
+    redirect(
+      `/onboarding?erro=${encodeURIComponent("Selecione o sexo biológico")}`
+    );
+  }
+
   const update = {
-    nome: String(formData.get("nome") ?? "").trim(),
-    idade: parseOptionalNumber(formData.get("idade")),
-    telefone: parseOptionalText(formData.get("telefone")),
-    academia: parseOptionalText(formData.get("academia")),
-    instrutor: parseOptionalText(formData.get("instrutor")),
+    sexo: sexo as Sexo,
     altura_cm: parseOptionalNumber(formData.get("altura_cm")),
     peso_inicial_kg: parseOptionalNumber(formData.get("peso_inicial_kg")),
     objetivo: parseOptionalText(formData.get("objetivo")) as Objetivo | null,
-    sexo: parseOptionalText(formData.get("sexo")) as Sexo | null,
   };
 
   const { error } = await supabase
@@ -44,9 +46,10 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
-    redirect(`/perfil?erro=${encodeURIComponent(error.message)}`);
+    redirect(`/onboarding?erro=${encodeURIComponent(error.message)}`);
   }
 
   revalidatePath("/perfil");
-  redirect("/perfil?sucesso=1");
+  revalidatePath("/acompanhamento");
+  redirect("/inicio");
 }

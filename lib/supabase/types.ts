@@ -3,6 +3,7 @@
 //   npx supabase gen types typescript --local > lib/supabase/types.ts
 
 export type Objetivo = "ganho" | "perda";
+export type Sexo = "masculino" | "feminino";
 export type DiaSemana =
   | "segunda"
   | "terca"
@@ -30,6 +31,7 @@ export interface Database {
           peso_inicial_kg: number | null;
           data_inicio: string | null;
           objetivo: Objetivo | null;
+          sexo: Sexo | null;
           criado_em: string;
         };
         Insert: {
@@ -44,6 +46,7 @@ export interface Database {
           peso_inicial_kg?: number | null;
           data_inicio?: string | null;
           objetivo?: Objetivo | null;
+          sexo?: Sexo | null;
           criado_em?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;

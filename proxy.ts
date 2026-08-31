@@ -52,6 +52,28 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  if (user && !isPublicPath) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("sexo")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const onboardingCompleto = profile?.sexo != null;
+
+    if (!onboardingCompleto && pathname !== "/onboarding") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
+
+    if (onboardingCompleto && pathname === "/onboarding") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/inicio";
+      return NextResponse.redirect(url);
+    }
+  }
+
   return response;
 }
 

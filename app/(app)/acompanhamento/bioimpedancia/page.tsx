@@ -3,6 +3,8 @@ import { ChevronLeft, Trash2 } from "lucide-react";
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { getDataHojeBrasil, formatarDataBr } from "@/lib/utils/data-brasil";
+import { BodySilhouette } from "@/components/body-silhouette";
+import { ComposicaoChart } from "./composicao-chart";
 import { registrarBioimpedancia, excluirBioimpedancia } from "./actions";
 
 type Campo = {
@@ -144,7 +146,7 @@ export default async function BioimpedanciaPage({
 }: {
   searchParams: Promise<{ erro?: string; sucesso?: string }>;
 }) {
-  const { user } = await getUserAndProfile();
+  const { user, profile } = await getUserAndProfile();
   const { erro, sucesso } = await searchParams;
   const supabase = await createClient();
 
@@ -155,6 +157,15 @@ export default async function BioimpedanciaPage({
     )
     .eq("user_id", user?.id ?? "")
     .order("data", { ascending: false });
+
+  const gordurasRegistradas = (registros ?? [])
+    .map((r) => r.percentual_gordura)
+    .filter((v): v is number => v != null);
+  const mediaGordura =
+    gordurasRegistradas.length > 0
+      ? gordurasRegistradas.reduce((a, b) => a + b, 0) /
+        gordurasRegistradas.length
+      : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,6 +178,31 @@ export default async function BioimpedanciaPage({
       </Link>
 
       <h1 className="text-xl font-semibold text-foreground">Bioimpedância</h1>
+
+      {mediaGordura != null && (
+        <div className="flex items-center gap-2 rounded-2xl border border-border bg-card p-4">
+          <BodySilhouette
+            sexo={profile?.sexo}
+            className="h-32 w-auto shrink-0 text-foreground-secondary"
+          />
+          <div className="flex-1">
+            <p className="mb-1 text-center text-xs text-foreground-secondary">
+              Média de {gordurasRegistradas.length} medição(ões)
+            </p>
+            <ComposicaoChart percentualGordura={mediaGordura} />
+            <div className="mt-1 flex justify-center gap-4 text-xs">
+              <span className="flex items-center gap-1.5 text-foreground-secondary">
+                <span className="h-2 w-2 rounded-full bg-status-partial" />
+                Gordura {mediaGordura.toFixed(1)}%
+              </span>
+              <span className="flex items-center gap-1.5 text-foreground-secondary">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                Massa magra {(100 - mediaGordura).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
         <p className="text-sm font-medium text-foreground">Nova medição</p>
