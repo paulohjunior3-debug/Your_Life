@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import type { DiaSemana } from "@/lib/supabase/types";
 import { nomeDia } from "@/lib/utils/dias-semana";
 
+type ExercicioPlano = { exercicio_id: string; series: number };
+
 export async function salvarFichaTreino(
-  plano: Partial<Record<DiaSemana, string[]>>
+  plano: Partial<Record<DiaSemana, ExercicioPlano[]>>
 ) {
   const supabase = await createClient();
 
@@ -19,11 +21,11 @@ export async function salvarFichaTreino(
     redirect("/login");
   }
 
-  for (const [dia, exerciseIds] of Object.entries(plano) as [
+  for (const [dia, itens] of Object.entries(plano) as [
     DiaSemana,
-    string[],
+    ExercicioPlano[],
   ][]) {
-    if (!exerciseIds || exerciseIds.length === 0) continue;
+    if (!itens || itens.length === 0) continue;
 
     const { data: template, error: templateError } = await supabase
       .from("workout_templates")
@@ -48,10 +50,10 @@ export async function salvarFichaTreino(
       .delete()
       .eq("template_id", template.id);
 
-    const rows = exerciseIds.map((exerciseId, index) => ({
+    const rows = itens.map((item, index) => ({
       template_id: template.id,
-      exercise_id: exerciseId,
-      series: 3,
+      exercise_id: item.exercicio_id,
+      series: item.series,
       rep_min: 8,
       rep_max: 12,
       ordem: index,

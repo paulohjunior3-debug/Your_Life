@@ -14,7 +14,9 @@ type Exercise = Pick<
 
 type Fase = "dias" | "musculo" | "exercicios" | "resumo";
 
-type Plano = Partial<Record<DiaSemana, string[]>>;
+type ExercicioPlano = { exercicio_id: string; series: number };
+
+type Plano = Partial<Record<DiaSemana, ExercicioPlano[]>>;
 
 const cardBase =
   "rounded-xl border border-border bg-card p-3 transition-colors";
@@ -106,7 +108,10 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
   function confirmarExercicios() {
     setPlano((prev) => ({
       ...prev,
-      [diaAtual]: [...(prev[diaAtual] ?? []), ...exerciciosTemp],
+      [diaAtual]: [
+        ...(prev[diaAtual] ?? []),
+        ...exerciciosTemp.map((id) => ({ exercicio_id: id, series: 3 })),
+      ],
     }));
     proximoDia();
   }
@@ -117,6 +122,17 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
     setGruposSelecionados([]);
     setEditandoDoResumo(true);
     setFase("musculo");
+  }
+
+  function ajustarSeries(dia: DiaSemana, exercicioId: string, delta: number) {
+    setPlano((prev) => ({
+      ...prev,
+      [dia]: (prev[dia] ?? []).map((item) =>
+        item.exercicio_id === exercicioId
+          ? { ...item, series: Math.max(1, Math.min(10, item.series + delta)) }
+          : item
+      ),
+    }));
   }
 
   async function concluir() {
@@ -354,10 +370,7 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
 
       <div className="flex flex-col gap-3">
         {diasSelecionados.map((dia) => {
-          const ids = plano[dia] ?? [];
-          const nomes = ids.map(
-            (id) => exercises.find((e) => e.id === id)?.nome ?? id
-          );
+          const itens = plano[dia] ?? [];
           return (
             <div key={dia} className={cardBase}>
               <div className="flex items-center justify-between">
@@ -370,15 +383,53 @@ export function MontarTreinoWizard({ exercises }: { exercises: Exercise[] }) {
                   Editar
                 </button>
               </div>
-              {nomes.length === 0 ? (
+              {itens.length === 0 ? (
                 <p className="text-sm text-foreground-secondary">
                   Nenhum exercício adicionado.
                 </p>
               ) : (
-                <ul className="mt-1 text-sm text-foreground-secondary">
-                  {nomes.map((nome, i) => (
-                    <li key={i}>{nome}</li>
-                  ))}
+                <ul className="mt-2 flex flex-col gap-2">
+                  {itens.map((item) => {
+                    const nome =
+                      exercises.find((e) => e.id === item.exercicio_id)
+                        ?.nome ?? item.exercicio_id;
+                    return (
+                      <li
+                        key={item.exercicio_id}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span className="flex-1 text-sm text-foreground">
+                          {nome}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              ajustarSeries(dia, item.exercicio_id, -1)
+                            }
+                            className="flex h-6 w-6 items-center justify-center rounded border border-border text-foreground transition-colors hover:bg-surface"
+                          >
+                            −
+                          </button>
+                          <span className="w-4 text-center text-sm text-foreground">
+                            {item.series}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              ajustarSeries(dia, item.exercicio_id, 1)
+                            }
+                            className="flex h-6 w-6 items-center justify-center rounded border border-border text-foreground transition-colors hover:bg-surface"
+                          >
+                            +
+                          </button>
+                          <span className="text-xs text-foreground-secondary">
+                            séries
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
