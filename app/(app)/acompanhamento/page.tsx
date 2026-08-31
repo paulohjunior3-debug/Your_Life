@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { formatarDataBr, getInicioSemanaDeData } from "@/lib/utils/data-brasil";
@@ -19,18 +21,26 @@ export default async function AcompanhamentoPage({
   const { erro, sucesso } = await searchParams;
   const supabase = await createClient();
 
-  const [{ data: pesos }, { data: sessoes }] = await Promise.all([
-    supabase
-      .from("body_logs")
-      .select("semana, peso_kg")
-      .eq("user_id", user?.id ?? "")
-      .order("semana"),
-    supabase
-      .from("sessions")
-      .select("data, session_sets(carga_kg, reps, concluida)")
-      .eq("user_id", user?.id ?? "")
-      .order("data"),
-  ]);
+  const [{ data: pesos }, { data: sessoes }, { data: ultimaBioimpedancia }] =
+    await Promise.all([
+      supabase
+        .from("body_logs")
+        .select("semana, peso_kg")
+        .eq("user_id", user?.id ?? "")
+        .order("semana"),
+      supabase
+        .from("sessions")
+        .select("data, session_sets(carga_kg, reps, concluida)")
+        .eq("user_id", user?.id ?? "")
+        .order("data"),
+      supabase
+        .from("bioimpedancia_logs")
+        .select("data, peso_kg, percentual_gordura")
+        .eq("user_id", user?.id ?? "")
+        .order("data", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   const dadosFixos = [
     { label: "Data de início", value: formatarDataBr(profile?.data_inicio) },
@@ -127,6 +137,31 @@ export default async function AcompanhamentoPage({
           </button>
         </form>
       </div>
+
+      <Link
+        href="/acompanhamento/bioimpedancia"
+        className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-surface"
+      >
+        <div>
+          <p className="text-sm font-medium text-foreground">Bioimpedância</p>
+          {ultimaBioimpedancia ? (
+            <p className="mt-1 text-xs text-foreground-secondary">
+              Última medição em {formatarDataBr(ultimaBioimpedancia.data)}
+              {ultimaBioimpedancia.peso_kg != null
+                ? ` · ${ultimaBioimpedancia.peso_kg} kg`
+                : ""}
+              {ultimaBioimpedancia.percentual_gordura != null
+                ? ` · ${ultimaBioimpedancia.percentual_gordura}% gordura`
+                : ""}
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-foreground-secondary">
+              Nenhuma medição registrada -- toque pra adicionar a primeira.
+            </p>
+          )}
+        </div>
+        <ChevronRight size={18} className="shrink-0 text-foreground-secondary" />
+      </Link>
 
       <div className="rounded-2xl border border-border bg-card p-4">
         <p className="mb-2 text-sm font-medium text-foreground">

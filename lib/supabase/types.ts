@@ -265,6 +265,42 @@ export interface Database {
         >;
         Relationships: [];
       };
+      bioimpedancia_logs: {
+        Row: {
+          id: string;
+          user_id: string;
+          data: string;
+          peso_kg: number | null;
+          percentual_gordura: number | null;
+          massa_magra_kg: number | null;
+          massa_muscular_kg: number | null;
+          agua_corporal_pct: number | null;
+          massa_ossea_kg: number | null;
+          gordura_visceral: number | null;
+          taxa_metabolica_basal: number | null;
+          idade_metabolica: number | null;
+          criado_em: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          data?: string;
+          peso_kg?: number | null;
+          percentual_gordura?: number | null;
+          massa_magra_kg?: number | null;
+          massa_muscular_kg?: number | null;
+          agua_corporal_pct?: number | null;
+          massa_ossea_kg?: number | null;
+          gordura_visceral?: number | null;
+          taxa_metabolica_basal?: number | null;
+          idade_metabolica?: number | null;
+          criado_em?: string;
+        };
+        Update: Partial<
+          Database["public"]["Tables"]["bioimpedancia_logs"]["Insert"]
+        >;
+        Relationships: [];
+      };
     };
     Views: {
       public_ranking: {
