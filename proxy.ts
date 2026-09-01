@@ -53,13 +53,21 @@ export async function proxy(request: NextRequest) {
   }
 
   if (user && !isPublicPath) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("sexo")
-      .eq("id", user.id)
-      .maybeSingle();
+    // Evita bater no banco em toda navegação só pra checar isso: uma vez
+    // que sabemos que o onboarding tá completo, guardamos num cookie
+    // (com o id do usuário, pra não vazar de uma conta pra outra no
+    // mesmo navegador) e só voltamos a consultar se o cookie sumir.
+    const cookieOnboarding = request.cookies.get("ob")?.value === user.id;
+    let onboardingCompleto = cookieOnboarding;
 
-    const onboardingCompleto = profile?.sexo != null;
+    if (!cookieOnboarding) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("sexo")
+        .eq("id", user.id)
+        .maybeSingle();
+      onboardingCompleto = profile?.sexo != null;
+    }
 
     if (!onboardingCompleto && pathname !== "/onboarding") {
       const url = request.nextUrl.clone();
@@ -71,6 +79,15 @@ export async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/inicio";
       return NextResponse.redirect(url);
+    }
+
+    if (onboardingCompleto && !cookieOnboarding) {
+      response.cookies.set("ob", user.id, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: true,
+        sameSite: "lax",
+      });
     }
   }
 
