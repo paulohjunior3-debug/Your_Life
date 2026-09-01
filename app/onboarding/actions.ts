@@ -3,7 +3,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { Objetivo, Sexo } from "@/lib/supabase/types";
+import type { Database, Objetivo, Sexo } from "@/lib/supabase/types";
+
+type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 function parseOptionalNumber(value: FormDataEntryValue | null) {
   const str = String(value ?? "").trim();
@@ -33,12 +35,20 @@ export async function salvarOnboarding(formData: FormData) {
     );
   }
 
-  const update = {
+  const update: ProfileUpdate = {
     sexo: sexo as Sexo,
     altura_cm: parseOptionalNumber(formData.get("altura_cm")),
-    peso_inicial_kg: parseOptionalNumber(formData.get("peso_inicial_kg")),
     objetivo: parseOptionalText(formData.get("objetivo")) as Objetivo | null,
   };
+
+  // Campo de peso inicial trancado (>48h) vem desabilitado no form, então
+  // nem é enviado -- só mexe nele se realmente veio no submit, senão o
+  // trigger do banco barra a "mudança" pra null.
+  if (formData.has("peso_inicial_kg")) {
+    update.peso_inicial_kg = parseOptionalNumber(
+      formData.get("peso_inicial_kg")
+    );
+  }
 
   const { error } = await supabase
     .from("profiles")
