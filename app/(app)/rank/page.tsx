@@ -1,5 +1,6 @@
 import { Trophy, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { ProximosParticipantes } from "@/components/proximos-participantes";
 import { alternarParticipacao } from "./actions";
 
 const CORES_PODIO = [
@@ -14,14 +15,16 @@ export default async function RankPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: optin }, { data: ranking }] = await Promise.all([
-    supabase
-      .from("race_optins")
-      .select("ativo")
-      .eq("user_id", user?.id ?? "")
-      .maybeSingle(),
-    supabase.rpc("ranking_semana_atual"),
-  ]);
+  const [{ data: optin }, { data: ranking }, { data: proximaSemana }] =
+    await Promise.all([
+      supabase
+        .from("race_optins")
+        .select("ativo")
+        .eq("user_id", user?.id ?? "")
+        .maybeSingle(),
+      supabase.rpc("ranking_semana_atual"),
+      supabase.rpc("participantes_proxima_semana"),
+    ]);
 
   const participando = optin?.ativo ?? false;
   const lista = ranking ?? [];
@@ -58,6 +61,8 @@ export default async function RankPage() {
           />
         </button>
       </form>
+
+      <ProximosParticipantes participantes={proximaSemana ?? []} />
 
       {lista.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-foreground-secondary">

@@ -356,6 +356,15 @@ export interface Database {
           pontos: number;
         }[];
       };
+      participantes_proxima_semana: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          nome: string;
+          avatar_url: string | null;
+          ja_pontuando: boolean;
+        }[];
+      };
     };
   };
 }

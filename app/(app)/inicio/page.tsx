@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
+import { ProximosParticipantes } from "@/components/proximos-participantes";
 import { PistaCorrida } from "./pista-corrida";
 import {
   getDataHojeBrasil,
@@ -25,6 +26,7 @@ export default async function InicioPage() {
     { data: templatesDoUsuario },
     { count: treinosNoMes },
     { data: ultimoPeso },
+    { data: proximaSemana },
   ] = await Promise.all([
     supabase.rpc("ranking_semana_atual"),
     supabase
@@ -53,6 +55,7 @@ export default async function InicioPage() {
       .order("semana", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase.rpc("participantes_proxima_semana"),
   ]);
 
   const diasDeTreino = new Set(
@@ -115,6 +118,8 @@ export default async function InicioPage() {
           </p>
         )}
       </Link>
+
+      <ProximosParticipantes participantes={proximaSemana ?? []} />
 
       <div className="grid grid-cols-2 gap-3">
         {metrics.map((metric) => (
