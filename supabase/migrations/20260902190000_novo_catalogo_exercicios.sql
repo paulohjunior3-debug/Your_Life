@@ -2,10 +2,15 @@
 -- /gif do projeto, processada e copiada pra public/exercicios/). Mantém só
 -- o grupo Abdômen do catálogo antigo, que não tem equivalente na leva nova.
 --
--- Remove template_exercises que apontam pros exercícios sendo descartados
--- antes de apagar os exercícios em si (template_exercises.exercise_id
--- referencia exercises com on delete restrict).
+-- Remove template_exercises e session_sets que apontam pros exercícios
+-- sendo descartados antes de apagar os exercícios em si (ambas as tabelas
+-- referenciam exercises com on delete restrict).
 delete from template_exercises
+where exercise_id in (
+  select id from exercises where grupo_muscular <> 'Abdômen'
+);
+
+delete from session_sets
 where exercise_id in (
   select id from exercises where grupo_muscular <> 'Abdômen'
 );
