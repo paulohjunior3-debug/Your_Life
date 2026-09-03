@@ -1,5 +1,6 @@
 import { getUserAndProfile } from "@/lib/supabase/get-profile";
 import { pesoInicialTravado } from "@/lib/utils/peso-inicial";
+import { OBJETIVOS } from "@/lib/utils/objetivos";
 import { salvarOnboarding } from "./actions";
 
 export default async function OnboardingPage({
@@ -65,6 +66,38 @@ export default async function OnboardingPage({
         </div>
 
         <div className="flex flex-col gap-1">
+          <span className="text-sm text-foreground-secondary">Biotipo</span>
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                { value: "ectomorfo", label: "Ectomorfo" },
+                { value: "mesomorfo", label: "Mesomorfo" },
+                { value: "endomorfo", label: "Endomorfo" },
+              ] as const
+            ).map((opcao) => (
+              <label
+                key={opcao.value}
+                className="flex cursor-pointer items-center justify-center rounded-lg border border-border bg-surface px-2 py-2 text-center text-sm text-foreground has-[:checked]:border-accent has-[:checked]:bg-accent has-[:checked]:text-background"
+              >
+                <input
+                  type="radio"
+                  name="biotipo"
+                  value={opcao.value}
+                  defaultChecked={profile?.biotipo === opcao.value}
+                  required
+                  className="sr-only"
+                />
+                {opcao.label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-foreground-secondary">
+            Só pra personalizar o volume de treino sugerido -- não é
+            avaliação médica.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-1">
           <label htmlFor="altura_cm" className="text-sm text-foreground-secondary">
             Altura (cm)
           </label>
@@ -72,7 +105,9 @@ export default async function OnboardingPage({
             id="altura_cm"
             name="altura_cm"
             type="number"
-            min={0}
+            min={1}
+            max={260}
+            required
             defaultValue={profile?.altura_cm ?? ""}
             className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
           />
@@ -89,8 +124,10 @@ export default async function OnboardingPage({
             id="peso_inicial_kg"
             name="peso_inicial_kg"
             type="number"
-            min={0}
+            min={1}
+            max={400}
             step="0.1"
+            required={!travado}
             disabled={travado}
             defaultValue={profile?.peso_inicial_kg ?? ""}
             className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent disabled:opacity-50"
@@ -109,12 +146,18 @@ export default async function OnboardingPage({
           <select
             id="objetivo"
             name="objetivo"
+            required
             defaultValue={profile?.objetivo ?? ""}
             className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-accent"
           >
-            <option value="">Não definido</option>
-            <option value="ganho">Ganho de massa</option>
-            <option value="perda">Perda de peso</option>
+            <option value="" disabled>
+              Selecione...
+            </option>
+            {OBJETIVOS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -122,7 +165,7 @@ export default async function OnboardingPage({
           type="submit"
           className="mt-1 rounded-lg bg-accent px-3 py-2 font-medium text-background transition-colors hover:bg-accent-hover"
         >
-          Entrar no Your Life
+          Continuar
         </button>
       </form>
     </div>

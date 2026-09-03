@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { Database, Objetivo, Sexo } from "@/lib/supabase/types";
+import type { Biotipo, Database, Objetivo, Sexo } from "@/lib/supabase/types";
 
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
@@ -35,19 +35,58 @@ export async function salvarOnboarding(formData: FormData) {
     );
   }
 
+  const biotipo = String(formData.get("biotipo") ?? "");
+  if (
+    biotipo !== "ectomorfo" &&
+    biotipo !== "mesomorfo" &&
+    biotipo !== "endomorfo"
+  ) {
+    redirect(`/onboarding?erro=${encodeURIComponent("Selecione o biotipo")}`);
+  }
+
+  const altura_cm = parseOptionalNumber(formData.get("altura_cm"));
+  if (altura_cm == null || altura_cm <= 0 || altura_cm > 260) {
+    redirect(
+      `/onboarding?erro=${encodeURIComponent("Informe uma altura válida")}`
+    );
+  }
+
+  const objetivo = parseOptionalText(formData.get("objetivo"));
+  if (!objetivo) {
+    redirect(
+      `/onboarding?erro=${encodeURIComponent("Selecione seu objetivo")}`
+    );
+  }
+
   const update: ProfileUpdate = {
     sexo: sexo as Sexo,
-    altura_cm: parseOptionalNumber(formData.get("altura_cm")),
-    objetivo: parseOptionalText(formData.get("objetivo")) as Objetivo | null,
+    biotipo: biotipo as Biotipo,
+    altura_cm,
+    objetivo: objetivo as Objetivo,
   };
 
   // Campo de peso inicial trancado (>48h) vem desabilitado no form, então
   // nem é enviado -- só mexe nele se realmente veio no submit, senão o
   // trigger do banco barra a "mudança" pra null.
   if (formData.has("peso_inicial_kg")) {
-    update.peso_inicial_kg = parseOptionalNumber(
-      formData.get("peso_inicial_kg")
-    );
+    const peso = parseOptionalNumber(formData.get("peso_inicial_kg"));
+    if (peso == null || peso <= 0 || peso > 400) {
+      redirect(
+        `/onboarding?erro=${encodeURIComponent("Informe um peso válido")}`
+      );
+    }
+    update.peso_inicial_kg = peso;
+  } else {
+    const { data: perfilAtual } = await supabase
+      .from("profiles")
+      .select("peso_inicial_kg")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (perfilAtual?.peso_inicial_kg == null) {
+      redirect(
+        `/onboarding?erro=${encodeURIComponent("Informe um peso válido")}`
+      );
+    }
   }
 
   const { error } = await supabase
@@ -61,5 +100,5 @@ export async function salvarOnboarding(formData: FormData) {
 
   revalidatePath("/perfil");
   revalidatePath("/acompanhamento");
-  redirect("/inicio");
+  redirect("/onboarding/comecar");
 }

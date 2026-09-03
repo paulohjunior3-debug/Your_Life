@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { Database, Objetivo, Sexo } from "@/lib/supabase/types";
+import type { Biotipo, Database, Objetivo, Sexo } from "@/lib/supabase/types";
 
 type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
@@ -37,6 +37,7 @@ export async function updateProfile(formData: FormData) {
     altura_cm: parseOptionalNumber(formData.get("altura_cm")),
     objetivo: parseOptionalText(formData.get("objetivo")) as Objetivo | null,
     sexo: parseOptionalText(formData.get("sexo")) as Sexo | null,
+    biotipo: parseOptionalText(formData.get("biotipo")) as Biotipo | null,
   };
 
   // Campo de peso inicial trancado (>48h) vem desabilitado no form, então

@@ -2,8 +2,17 @@
 // Quando o Supabase CLI estiver disponível, substituir por:
 //   npx supabase gen types typescript --local > lib/supabase/types.ts
 
-export type Objetivo = "ganho" | "perda";
+export type Objetivo =
+  | "ganho"
+  | "perda"
+  | "hipertrofia"
+  | "emagrecimento"
+  | "definicao"
+  | "manutencao"
+  | "forca"
+  | "condicionamento";
 export type Sexo = "masculino" | "feminino";
+export type Biotipo = "ectomorfo" | "mesomorfo" | "endomorfo";
 export type DiaSemana =
   | "segunda"
   | "terca"
@@ -32,6 +41,7 @@ export interface Database {
           data_inicio: string | null;
           objetivo: Objetivo | null;
           sexo: Sexo | null;
+          biotipo: Biotipo | null;
           criado_em: string;
         };
         Insert: {
@@ -47,6 +57,7 @@ export interface Database {
           data_inicio?: string | null;
           objetivo?: Objetivo | null;
           sexo?: Sexo | null;
+          biotipo?: Biotipo | null;
           criado_em?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pencil } from "lucide-react";
 import type { Database } from "@/lib/supabase/types";
 import { formatarDataBr } from "@/lib/utils/data-brasil";
+import { nomeObjetivo, OBJETIVOS } from "@/lib/utils/objetivos";
 import { updateProfile } from "./actions";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -22,6 +23,13 @@ const CAMPOS_LEITURA: { label: string; value: (p: Profile) => string }[] = [
           ? "Feminino"
           : "—",
   },
+  {
+    label: "Biotipo",
+    value: (p) =>
+      p.biotipo
+        ? p.biotipo.charAt(0).toUpperCase() + p.biotipo.slice(1)
+        : "—",
+  },
   { label: "Idade", value: (p) => (p.idade ? String(p.idade) : "—") },
   { label: "Telefone", value: (p) => p.telefone ?? "—" },
   { label: "Academia", value: (p) => p.academia ?? "—" },
@@ -31,15 +39,7 @@ const CAMPOS_LEITURA: { label: string; value: (p: Profile) => string }[] = [
     label: "Peso inicial",
     value: (p) => (p.peso_inicial_kg ? `${p.peso_inicial_kg} kg` : "—"),
   },
-  {
-    label: "Objetivo",
-    value: (p) =>
-      p.objetivo === "ganho"
-        ? "Ganho de massa"
-        : p.objetivo === "perda"
-          ? "Perda de peso"
-          : "—",
-  },
+  { label: "Objetivo", value: (p) => nomeObjetivo(p.objetivo) },
   { label: "Data de início", value: (p) => formatarDataBr(p.data_inicio) },
 ];
 
@@ -104,6 +104,33 @@ export function PerfilEditor({
                 name="sexo"
                 value={opcao.value}
                 defaultChecked={profile?.sexo === opcao.value}
+                className="sr-only"
+              />
+              {opcao.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className={labelClass}>Biotipo</span>
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { value: "ectomorfo", label: "Ectomorfo" },
+              { value: "mesomorfo", label: "Mesomorfo" },
+              { value: "endomorfo", label: "Endomorfo" },
+            ] as const
+          ).map((opcao) => (
+            <label
+              key={opcao.value}
+              className="flex cursor-pointer items-center justify-center rounded-lg border border-border bg-surface px-2 py-2 text-center text-sm text-foreground has-[:checked]:border-accent has-[:checked]:bg-accent has-[:checked]:text-background"
+            >
+              <input
+                type="radio"
+                name="biotipo"
+                value={opcao.value}
+                defaultChecked={profile?.biotipo === opcao.value}
                 className="sr-only"
               />
               {opcao.label}
@@ -230,8 +257,11 @@ export function PerfilEditor({
           className={inputClass}
         >
           <option value="">Não definido</option>
-          <option value="ganho">Ganho de massa</option>
-          <option value="perda">Perda de peso</option>
+          {OBJETIVOS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
       </div>
 
