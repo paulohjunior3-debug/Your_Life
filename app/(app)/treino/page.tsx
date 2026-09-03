@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Dumbbell, Pencil, Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { DiaSemana } from "@/lib/supabase/types";
 import { nomeDia, ordemDia } from "@/lib/utils/dias-semana";
 import { getDataHojeBrasil, getDiaSemanaHojeBrasil } from "@/lib/utils/data-brasil";
 import { iniciarTreino } from "./actions";
 import { BotaoIniciarTreino } from "./botao-iniciar-treino";
+import { ExercicioEditavel } from "./exercicio-editavel";
 
 type TemplateComExercicios = {
   id: string;
@@ -32,13 +33,20 @@ export default async function TreinoPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data } = await supabase
-    .from("workout_templates")
-    .select(
-      "id, nome, dia_semana, template_exercises(id, series, rep_min, rep_max, ordem, exercises(id, nome, grupo_muscular, gif_url))"
-    )
-    .eq("criado_por", user?.id ?? "")
-    .not("dia_semana", "is", null);
+  const [{ data }, { data: catalogo }] = await Promise.all([
+    supabase
+      .from("workout_templates")
+      .select(
+        "id, nome, dia_semana, template_exercises(id, series, rep_min, rep_max, ordem, exercises(id, nome, grupo_muscular, gif_url))"
+      )
+      .eq("criado_por", user?.id ?? "")
+      .not("dia_semana", "is", null),
+    supabase
+      .from("exercises")
+      .select("id, nome, grupo_muscular, gif_url")
+      .order("grupo_muscular")
+      .order("nome"),
+  ]);
 
   const templates = (data ?? []) as unknown as TemplateComExercicios[];
   templates.sort((a, b) => ordemDia(a.dia_semana) - ordemDia(b.dia_semana));
@@ -127,32 +135,11 @@ export default async function TreinoPage() {
                   </p>
                   <div className="flex flex-col gap-2">
                     {lista.map((te) => (
-                      <div
+                      <ExercicioEditavel
                         key={te.id}
-                        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
-                      >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface text-foreground-secondary">
-                          {te.exercises?.gif_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={te.exercises.gif_url}
-                              alt={te.exercises.nome}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <Dumbbell size={20} />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-foreground">
-                            {te.exercises?.nome}
-                          </p>
-                          <p className="text-xs text-foreground-secondary">
-                            {te.series}x{te.rep_min}
-                            {te.rep_min !== te.rep_max ? `-${te.rep_max}` : ""}
-                          </p>
-                        </div>
-                      </div>
+                        templateExercise={te}
+                        catalogo={catalogo ?? []}
+                      />
                     ))}
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function iniciarTreino(formData: FormData) {
@@ -92,4 +93,93 @@ export async function iniciarTreino(formData: FormData) {
   }
 
   redirect(`/treino/sessao/${sessao.id}`);
+}
+
+export async function atualizarExercicioTreino(
+  templateExerciseId: string,
+  dados: {
+    exercise_id: string;
+    series: number;
+    rep_min: number;
+    rep_max: number;
+  }
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Não autenticado" };
+  }
+
+  if (
+    !dados.exercise_id ||
+    !Number.isInteger(dados.series) ||
+    dados.series < 1 ||
+    dados.series > 10
+  ) {
+    return { error: "Número de séries inválido (1 a 10)" };
+  }
+
+  if (
+    !Number.isInteger(dados.rep_min) ||
+    !Number.isInteger(dados.rep_max) ||
+    dados.rep_min < 1 ||
+    dados.rep_max < dados.rep_min
+  ) {
+    return { error: "Faixa de repetições inválida" };
+  }
+
+  const { data: exercicioValido } = await supabase
+    .from("exercises")
+    .select("id")
+    .eq("id", dados.exercise_id)
+    .maybeSingle();
+
+  if (!exercicioValido) {
+    return { error: "Exercício não encontrado no catálogo" };
+  }
+
+  const { error } = await supabase
+    .from("template_exercises")
+    .update({
+      exercise_id: dados.exercise_id,
+      series: dados.series,
+      rep_min: dados.rep_min,
+      rep_max: dados.rep_max,
+    })
+    .eq("id", templateExerciseId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/treino");
+  return { error: null };
+}
+
+export async function removerExercicioTreino(templateExerciseId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Não autenticado" };
+  }
+
+  const { error } = await supabase
+    .from("template_exercises")
+    .delete()
+    .eq("id", templateExerciseId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/treino");
+  return { error: null };
 }
