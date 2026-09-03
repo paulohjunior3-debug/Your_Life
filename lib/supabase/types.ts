@@ -42,6 +42,7 @@ export interface Database {
           objetivo: Objetivo | null;
           sexo: Sexo | null;
           biotipo: Biotipo | null;
+          tour_concluido: boolean;
           criado_em: string;
         };
         Insert: {
@@ -58,6 +59,7 @@ export interface Database {
           objetivo?: Objetivo | null;
           sexo?: Sexo | null;
           biotipo?: Biotipo | null;
+          tour_concluido?: boolean;
           criado_em?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;

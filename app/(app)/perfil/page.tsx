@@ -3,6 +3,7 @@ import { signOut } from "@/lib/actions/sign-out";
 import { pesoInicialTravado } from "@/lib/utils/peso-inicial";
 import { PerfilEditor } from "./perfil-editor";
 import { AvatarUpload } from "./avatar-upload";
+import { ReverTourBotao } from "./rever-tour-botao";
 
 export default async function PerfilPage({
   searchParams,
@@ -39,6 +40,8 @@ export default async function PerfilPage({
       )}
 
       <PerfilEditor profile={profile} travado={travado} />
+
+      <ReverTourBotao />
 
       <form action={signOut}>
         <button
